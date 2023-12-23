@@ -1,25 +1,22 @@
+import numpy as np
+import cv2 as cv
+import time
+  
+npTmp = np.random.random((1024,1024)).astype(np.float32)
+npMat1 = np.stack([npTmp,npTmp],axis=2)
+npMat2 = npMat1
 
+cuMat1 = cv.cuda_GpuMat()
+cuMat2 = cv.cuda_GpuMat()
+cuMat1.upload(npMat1)
+cuMat2.upload(npMat2)
 
+start_time = time.time()
+cv.cuda.gemm(cuMat1,cuMat2,1,None,0,None,1)
 
-def count(stri,ele):
-    counto = 0
-    for i in stri:
-        if i == ele:
-            counto+=1
-    print(f"{stri}={counto}")
-    return counto
+print("CUDA using GPU ---%s seconds ----" % (time.time()-start_time))
 
-def maxScore(s):
-    lis = list(s)
-    a = 0
-    b = 0
-    ma = 0
-    for i in range(len(lis)-1):
-        a = count(lis[:i+1],"0")
-        b = count(lis[i+1:],"1")
-        
-        if ma<(a+b):
-            ma  = a+b
-        print(f"ma={ma}")
-    return ma
-maxScore("011101")
+start_time = time.time()
+cv.gemm(npMat1,npMat2,1,None,0,None,1)
+
+print('CPU -- %s seconds --- ' %(time.time()-start_time))
